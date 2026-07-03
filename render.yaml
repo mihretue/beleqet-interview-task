@@ -1,11 +1,9 @@
-# Render Blueprint — deploy from https://dashboard.render.com/blueprints
-# After deploy, set FRONTEND_URL to your Vercel URL and REDIS_* from Upstash (free tier).
-
-databases:
-  - name: beleqet-db
-    plan: free
-    databaseName: beleqet_db
-    user: beleqet_user
+# Render Blueprint — API only (database hosted on Neon)
+# 1. Create a Neon Postgres DB: https://console.neon.tech
+# 2. Copy the connection string (use Direct connection for Prisma)
+# 3. In Render → beleqet-api → Environment, set DATABASE_URL to your Neon URL
+# 4. Add Redis from Upstash (REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_TLS=true)
+# 5. Set FRONTEND_URL to your Vercel URL after frontend deploy
 
 services:
   - type: web
@@ -15,7 +13,7 @@ services:
     region: frankfurt
     rootDir: backend
     buildCommand: npm install && npm run build
-    startCommand: npx prisma db push --accept-data-loss && npm run start:prod
+    startCommand: npm run start:render
     healthCheckPath: /api/v1/jobs
     envVars:
       - key: NODE_ENV
@@ -27,9 +25,7 @@ services:
       - key: OPENAI_API_KEY
         value: dummy_key_for_demo
       - key: DATABASE_URL
-        fromDatabase:
-          name: beleqet-db
-          property: connectionString
+        sync: false
       - key: REDIS_HOST
         sync: false
       - key: REDIS_PORT
